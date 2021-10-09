@@ -33,7 +33,7 @@ const App = () => {
   return (
     <div className="App">
         <Wrapper inChat={showMessages}>
-          {!showMessages && <Input type="text" value={userId} onChange={(e) => setUserId(e.target.value)}></Input>}
+          {!showMessages && <Input placeholder='Type your name' type="text" value={userId} onChange={(e) => setUserId(e.target.value)}></Input>}
           <button onClick={() => setShowMessages(previous => !previous)}>
             {showMessages ? `End chat` : `Enter the group chat`}
           </button>
