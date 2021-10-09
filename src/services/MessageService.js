@@ -1,9 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: process.env.REACT_APP_BACK_URL,
-  withCredentials: true
-})
+  baseURL: process.env.REACT_APP_BACK_URL})
 
 export const sendMessage = async ({id, msg}) => {
   const res = await api.post('/publish', {
