@@ -1,5 +1,6 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { sendMessage } from '../services/MessageService';
 
 const ChatDeco = styled.div`
   width: 100%;
@@ -16,7 +17,7 @@ const MessagesWrapper = styled.div`
 export const Message = styled.div`
   background: ${({ type }) =>
     type == 'server'
-      ? 'linear-gradient(60deg,rgba(33, 6, 94, 1) 0%,rgba(83, 29, 171, 1) 100%);'
+      ? 'linear-gradient(60deg,rgba(247, 185, 17, 1) 0%,rgba(255, 214, 102, 1) 100%);'
       : 'linear-gradient(60deg,rgba(255,255,255, 1) 0%,rgba(211,211,211, 1) 100%);'};
   color: ${({ type }) => (type == 'server' ? 'white' : 'black')};
   border-radius: 10px;
@@ -28,52 +29,75 @@ export const Message = styled.div`
   word-wrap: break-word;
   text-overflow: ellipsis;
   max-width: 85%;
+  -webkit-text-stroke-width: 1px;
+  -webkit-text-stroke-color: black;
 `;
 
-export const Chat = ({id}) => {
+const Input = styled.input`
+  padding: 10px;
+  width: 96vw;
+  text-align: left;
+`;
+
+export const Chat = ({userId}) => {
   // Use ref to messages div
  
-  const msgRef = useRef();
-
-  const [messages, setMessages] = useState([])
+  const [messages, setMessages] = useState([{type: 'server', value:`Welcome ${userId}`}])
+  const [msgToSend, setMsgToSend] = useState('');
+  const [eventSource, setEventSource] = useState(() => new EventSource(process.env.REACT_APP_BACK_URL+'/consume'))
 
   useEffect(() => {
-    const sse = new EventSource('http://eda-application-eda-challenge.apps.cluster-knqm4.knqm4.sandbox560.opentlc.com/consume');
-    sse.onmessage = (e) => {
-      console.log(e);
-      setMessages([...messages, e])
-    }
-    sse.onerror = () => {
-      // error log here 
-      
-      sse.close();
+    if (eventSource) {
+      eventSource.onmessage = (e) => {
+        console.log('Previous messages', messages)
+        setMessages((currentState) => [{type: 'server', value: e.data}, ...currentState])
+      }
+      eventSource.onerror = () => {
+        eventSource.close();
+      }
     }
     return () => {
-      sse.close();
-    };
-  });
-
-/*   // The Chat service :)
-  const { sendMessage, messages } = useChatService(() => {
-    // Scroll the messages to end
-    // eslint-disable-next-line no-unused-expressions
-    if (msgRef.current) {
-      msgRef.current.scrollTop = msgRef.current.scrollHeight
+      if (eventSource) {
+        eventSource.close()
+      }
     }
-  }, id); */
+  }, [eventSource]);
+
+  
+
+  
+
+  const handleSend = () => {
+    sendMessage({id: userId, msg: msgToSend})
+    .then(() => {
+      setMessages((currentState) => [{type: 'local', value: msgToSend}, ...currentState])
+      setMsgToSend('')
+    })
+    .catch((err) => {
+      console.log("AXIOS ERROR: ", err);
+    })
+  } 
 
   return (
     <ChatDeco>
-      <MessagesWrapper
-        ref={msgRef}
-      >
+      <MessagesWrapper>
         {messages.map((message, i) => (
           <Message key={i} type={message.type}>
-            {message.text}
+            {message.value}
           </Message>
         ))}
       </MessagesWrapper>
-      
+      <Input
+        placeholder='Write a Message'
+        value={msgToSend}
+        onChange={(e) => setMsgToSend(e.target.value)}
+        onKeyPress={event => {
+          if (event.key === 'Enter') {
+            handleSend()
+          }
+        }}
+      />
     </ChatDeco>
   );
 };
+

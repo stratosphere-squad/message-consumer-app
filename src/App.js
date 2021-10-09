@@ -1,21 +1,47 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
+import styled, { ServerStyleSheet } from 'styled-components';
 
-import { Chat } from './components/Chat';
+import { Chat, input } from './components/Chat';
 import './App.css';
 
+const Wrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  max-width: 300px;
+  width: 50%;
+  position: absolute;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  bottom: ${({ inChat }) =>
+  (inChat ? '90%' : '50%')};
+  text-align: center;
+`;
+
+const Input = styled.input`
+  text-align: center;
+  
+`
+
+
 const App = () => {
-  const [showComments, setShowComments] = useState(false);
+  const [showMessages, setShowMessages] = useState(false);
+  const [userId, setUserId] = useState('');
+
 
   return (
     <div className="App">
-      <h1>React hook SSE</h1>
-    
-        <div>
-          <button onClick={() => setShowComments(previous => !previous)}>
-            Toggle "Comments"
+        <Wrapper inChat={showMessages}>
+          {!showMessages && <Input type="text" value={userId} onChange={(e) => setUserId(e.target.value)}></Input>}
+          <button onClick={() => setShowMessages(previous => !previous)}>
+            {showMessages ? `End chat` : `Enter the group chat`}
           </button>
-          {showComments && <Chat id='a' />}
-        </div>
+          </Wrapper>
+          
+          {showMessages && <Chat userId={userId} />}
+        
       
     </div>
   );
