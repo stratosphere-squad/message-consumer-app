@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import styled, { ServerStyleSheet } from 'styled-components';
+import styled from 'styled-components';
 
-import { Chat, input } from './components/Chat';
+import { Chat } from './components/Chat';
 import './App.css';
 
 const Wrapper = styled.div`
@@ -24,7 +24,6 @@ const Input = styled.input`
   text-align: center;
   
 `
-
 
 const App = () => {
   const [showMessages, setShowMessages] = useState(false);

@@ -16,15 +16,15 @@ const MessagesWrapper = styled.div`
 
 export const Message = styled.div`
   background: ${({ type }) =>
-    type == 'server'
+    type === 'server'
       ? 'linear-gradient(60deg,rgba(247, 185, 17, 1) 0%,rgba(255, 214, 102, 1) 100%);'
       : 'linear-gradient(60deg,rgba(255,255,255, 1) 0%,rgba(211,211,211, 1) 100%);'};
-  color: ${({ type }) => (type == 'server' ? 'white' : 'black')};
+  color: ${({ type }) => (type === 'server' ? 'white' : 'black')};
   border-radius: 10px;
   padding: 6px 10px;
   margin: ${({ type }) =>
-    type == 'server' ? '3px 20px 3px 10px' : '3px 10px 3px 20px'};
-  align-self: ${({ type }) => (type == 'server' ? 'flex-start' : 'flex-end')};
+    type === 'server' ? '3px 20px 3px 10px' : '3px 10px 3px 20px'};
+  align-self: ${({ type }) => (type === 'server' ? 'flex-start' : 'flex-end')};
   display: block;
   word-wrap: break-word;
   text-overflow: ellipsis;
@@ -44,12 +44,11 @@ export const Chat = ({userId}) => {
  
   const [messages, setMessages] = useState([{type: 'server', value:`Welcome ${userId}`}])
   const [msgToSend, setMsgToSend] = useState('');
-  const [eventSource, setEventSource] = useState(() => new EventSource(process.env.REACT_APP_BACK_URL+'/consume'))
+  const [eventSource] = useState(() => new EventSource(process.env.REACT_APP_BACK_URL+'/consume'))
 
   useEffect(() => {
     if (eventSource) {
       eventSource.onmessage = (e) => {
-        console.log('Previous messages', messages)
         setMessages((currentState) => [{type: 'server', value: e.data}, ...currentState])
       }
       eventSource.onerror = () => {
@@ -62,10 +61,6 @@ export const Chat = ({userId}) => {
       }
     }
   }, [eventSource]);
-
-  
-
-  
 
   const handleSend = () => {
     sendMessage({id: userId, msg: msgToSend})
